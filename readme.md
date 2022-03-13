@@ -14,7 +14,7 @@ JRIQuests gives you access to the JRIQuest, JRISponse as well as the HTTPMethods
 
 ### Installing
 
-* Download the jriquests.php file
+* Download the jriquest.php file
 * require/include it inside your project
 * You are done :smiley: No package manager needed!
 
