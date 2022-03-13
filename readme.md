@@ -1,10 +1,10 @@
 # JRIQuest-Library
 
-A simple PHP (7.3+) Curl-Wrapper focused on type safety, error prevention, easy debugging and intuitive error handling
+A simple PHP (7.3+) Curl-Wrapper focused on type safety, error prevention, easy debugging and intuitive error handling.
 
 ## Description
 
-JRIQuest gives you access to the JRIQuest, JRISponse as well as the HTTPMethods class to use inside your project. It provides
+JRIQuest gives you access to the JRIquest, JRIsponse as well as the HTTPMethods class to use inside your project.
 
 ## Getting Started
 
