@@ -15,6 +15,7 @@ abstract class HTTPMethods
 
 class JRIquest
 {
+    protected $ch;
     protected $uri;
     protected $params;
     protected $method;
@@ -27,6 +28,7 @@ class JRIquest
 
     function __construct(string $uri, string $method = HTTPMethods::GET, array $params = [], array $headers = [], string $body = "")
     {
+        $this->ch = curl_init();
         $this->uri = $uri;
         $this->method = $method;
         $this->params = http_build_query($params);
@@ -43,23 +45,23 @@ class JRIquest
         if (substr($this->uri, strlen($this->uri), 1) !== "/") {
             $this->uri .= "/";
         }
-        $ch = curl_init($this->uri . $this->params);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, ($this->ssl_verify ? 2 : 0));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, ($this->ssl_verify ? 2 : 0));
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($this->ch, CURLOPT_URL, $this->uri . $this->params);
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, ($this->ssl_verify ? 2 : 0));
+        curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, ($this->ssl_verify ? 2 : 0));
+        curl_setopt($this->ch, CURLOPT_HEADER, true);
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->method);
+        curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
         if (count($this->headers) > 0) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
         }
         if ($this->body != "") {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->body);
         }
-        $response = curl_exec($ch);
-        $this->http_version = curl_getinfo($ch, CURLINFO_HTTP_VERSION);
-        return new JRIsponse($ch, $response);
+        $response = curl_exec($this->ch);
+        $this->http_version = curl_getinfo($this->ch, CURLINFO_HTTP_VERSION);
+        return new JRIsponse($this->ch, $response);
     }
 
     function __toString()
@@ -162,6 +164,17 @@ class JRIquest
     {
         $this->body = $body;
         return $this;
+    }
+    
+    /**
+     * @param $curlopt
+     * @param $value
+     * @return bool
+     * Set a $curlopt to $value.
+     */
+    public function setCurlopt(int $curlopt, $value): bool
+    {
+        return curl_setopt($this->ch, $curlopt, $value);;
     }
 
     /**
@@ -295,7 +308,7 @@ class JRIsponse
 
     function __toString()
     {
-        $str = ($this->is_success() ? "SUCCESS" : "ERROR") . " " . $this->response_code . "\nTime: " . $this->total_time . " ms\n\nHeaders:\n";
+        $str = ($this->isSuccess() ? "SUCCESS" : "ERROR") . " " . $this->response_code . "\nTime: " . $this->total_time . " ms\n\nHeaders:\n";
         foreach ($this->headers as $key => $value) {
             $str .= "\t" . $key . ": " . $value . "\n";
         }
@@ -307,7 +320,7 @@ class JRIsponse
      * @return bool
      * Indicates a successfull request.
      */
-    public function is_success(): bool
+    public function isSuccess(): bool
     {
         return ($this->error_code !== 0 || $this->response_code >= 200 && $this->response_code < 400);
     }
@@ -316,9 +329,9 @@ class JRIsponse
      * @return bool
      * Indicates that there was an error.
      */
-    public function is_error(): bool
+    public function isError(): bool
     {
-        return !$this->is_success();
+        return !$this->isSuccess();
     }
 
     /**
@@ -403,7 +416,7 @@ class JRIsponse
      */
     public function getError(): string
     {
-        if (!$this->is_error()) {
+        if (!$this->isError()) {
             return false;
         }
         if ($this->error_code !== 0) {
@@ -419,7 +432,7 @@ class JRIsponse
      */
     public function getErrorHTML(): string
     {
-        if (!$this->is_error()) {
+        if (!$this->isError()) {
             return false;
         }
         if ($this->error_code !== 0) {
