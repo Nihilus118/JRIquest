@@ -26,6 +26,8 @@ Any Method is documented via Docstrings which should be shown inside most modern
 
 * 0.1
     * Initial Release
+* 0.2
+    * Ability to set CURLOPTs
 
 ## License
 
