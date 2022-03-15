@@ -165,16 +165,16 @@ class JRIquest
         $this->body = $body;
         return $this;
     }
-    
+
     /**
-     * @param $curlopt
+     * @param int $curlopt
      * @param $value
      * @return bool
-     * Set a $curlopt to $value.
+     * Set $curlopt to $value.
      */
     public function setCurlopt(int $curlopt, $value): bool
     {
-        return curl_setopt($this->ch, $curlopt, $value);;
+        return curl_setopt($this->ch, $curlopt, $value);
     }
 
     /**
