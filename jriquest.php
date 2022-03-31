@@ -26,7 +26,7 @@ class JRIquest
     protected $http_version;
     protected $ssl_verify = 1;
 
-    function __construct(string $uri, string $method = HTTPMethods::GET, array $params = [], array $headers = [], string $body = "")
+    function __construct(string $uri, string $method = HTTPMethods::GET, array $params = [], array $headers = [], string $body = null)
     {
         $this->ch = curl_init();
         $this->uri = $uri;
@@ -56,7 +56,7 @@ class JRIquest
         if (count($this->headers) > 0) {
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
         }
-        if ($this->body != "") {
+        if (!is_null($this->body)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->body);
         }
         $response = curl_exec($this->ch);
@@ -156,11 +156,11 @@ class JRIquest
     }
 
     /**
-     * @param string $body
+     * @param mixed $body
      * @return JRIquest
      * Set the body for the request.
      */
-    public function setBody(string $body): JRIquest
+    public function setBody($body): JRIquest
     {
         $this->body = $body;
         return $this;
@@ -322,7 +322,7 @@ class JRIsponse
      */
     public function isSuccess(): bool
     {
-        return ($this->error_code !== 0 || $this->response_code >= 200 && $this->response_code < 400);
+        return ($this->error_code === 0 && $this->response_code >= 200 && $this->response_code < 400);
     }
 
     /**
@@ -384,12 +384,12 @@ class JRIsponse
 
     /**
      * @return mixed
-     * Returns the response content parsed into an object or false if there was an error while parsing.
+     * Returns the response content parsed into an object if possible.
      */
     public function getContent()
     {
         if ($this->parsing_error !== false) {
-            return false;
+            return $this->body_raw;
         }
         return $this->content;
     }
